@@ -22,6 +22,12 @@ This document breaks the Master Specification into actionable 1-week sprints for
 
     * Architectural Guard: Set up ltree or materialized paths for subtree querying.
 
+    * **[SECURITY] Auth First:** Wire up Supabase Auth (Google OAuth) before any data write path is built. Auth is a prerequisite for Sprint 2, not a Sprint 11 concern.
+
+    * **[SECURITY] Enable RLS:** Enable Row Level Security on every table immediately after creation. Add baseline policies: authenticated users can only read/write their own records.
+
+    * **[SECURITY] Audit Field Triggers:** Create a Postgres trigger (`set_audit_fields`) that populates `created_by` and `last_edited_by` from `auth.uid()` on every `INSERT`/`UPDATE`. Never accept these values from the client.
+
 ### Sprint 2: The Infinite Canvas & Viewport Persistence
 
 * **Goal:** Set up a performant canvas that remembers where the user left off.
@@ -35,6 +41,8 @@ This document breaks the Master Specification into actionable 1-week sprints for
     * Viewport Persistence: Save zoom, x, and y coordinates to the DB/Localstorage.
 
     * Image Pipeline (Part 1): Integrate Cloudinary/S3 upload widget in a basic "Sandbox" page.
+
+    * **[SECURITY] Signed Uploads Only:** Configure Cloudinary with signed upload presets. Disable unsigned presets. Add server-side MIME type validation (`image/jpeg`, `image/png`, `image/webp` only). Replace uploaded filenames with system-generated UUIDs before storage.
 
 ### Sprint 3: The Union Node Engine (The DAG Logic)
 
@@ -127,6 +135,8 @@ This document breaks the Master Specification into actionable 1-week sprints for
 
     * Date Blocker: Prevent "Impossible Dates" (Child older than Parent).
 
+    * **[SECURITY] Merge Authorization Matrix:** Before building the fusion UI, enforce server-side role checks: Owners may merge any branches; Editors may only merge branches they have edit access to; View Only users cannot merge. Merging into a Locked branch always triggers an Owner approval request regardless of role.
+
 ### Sprint 10: Performance & Search
 
 * **Goal:** Optimize for 5,000+ nodes.
@@ -150,6 +160,8 @@ This document breaks the Master Specification into actionable 1-week sprints for
     * NextAuth.js: Integration of social/email login.
 
     * Recursive Permissions: Logic to grant access to a branch and its future children using the path logic from Sprint 1.
+
+    * **[SECURITY] RLS-Based Subtree Permissions:** Implement subtree access grants as Postgres RLS policies using the `ltree` path column — not as application-layer filters. Write explicit tests for permission edge cases: a collaborator cannot read a locked branch, a View Only user cannot write via direct API call, a rogue client cannot bypass branch locking by calling the API directly.
 
 ### Sprint 12: Real-time Collaboration
 

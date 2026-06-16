@@ -156,4 +156,61 @@ A. Governance & Permissions
 
 - **Database:** PostgreSQL provides the relational power needed for complex DAG ID linking and parent-child associations.
 
-- **Storage:** Cloudinary or AWS S3 for optimized, responsive profile image hosting.git 
+- **Storage:** Cloudinary or AWS S3 for optimized, responsive profile image hosting.
+
+## 8. Security Architecture
+
+Security is enforced at the database layer first and the application layer second. Client-side code is never trusted as a security boundary.
+
+### A. Authentication
+
+- **Supabase Auth is a hard prerequisite** before any data write path is built. No feature that touches the database ships without an authenticated user context. Google/Email OAuth is the minimum viable auth implementation and must be wired up in Sprint 1 alongside the schema — not deferred to Sprint 11.
+- All API routes validate the session server-side before executing any query.
+
+### B. Row Level Security (RLS)
+
+- **RLS is enabled on every table from day one.** The Supabase anon key is intentionally public, but it is only safe when RLS policies are in place. Without RLS, the anon key grants unrestricted read/write access to the entire database.
+- The baseline RLS policy for all tables: authenticated users may only `SELECT` records they are permitted to see; `INSERT`/`UPDATE`/`DELETE` requires ownership or an explicit collaborator grant.
+- Subtree permissions (see Section 6A) are implemented as **Postgres RLS policies using the `ltree` path column**, not as application-layer filters. This ensures that no client-side bug or API oversight can expose locked or private branches.
+
+### C. Audit Field Integrity
+
+- The `created_by` and `last_edited_by` columns present on every table are **populated by a Postgres trigger** using `auth.uid()`. These values are never accepted from the client. Any client-supplied value for these fields is ignored.
+
+```sql
+CREATE OR REPLACE FUNCTION set_audit_fields()
+RETURNS TRIGGER AS $$
+BEGIN
+  IF TG_OP = 'INSERT' THEN
+    NEW.created_by = auth.uid();
+  END IF;
+  NEW.last_edited_by = auth.uid();
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+```
+
+### D. Image Upload Security
+
+- Profile image uploads use **Cloudinary signed upload presets only**. Unsigned presets are disabled.
+- Accepted MIME types (`image/jpeg`, `image/png`, `image/webp`) are validated server-side. Frontend file-type checks are UX only and are not relied upon for security.
+- Uploaded filenames are sanitized and replaced with system-generated UUIDs before storage.
+
+### E. Tree Fusion Authorization
+
+- The merge/fusion workflow (Section 5B) enforces the following authorization matrix before any comparison modal is shown:
+  - **Owner:** May merge any branch into any other branch.
+  - **Editor:** May initiate a merge only between branches they have edit access to.
+  - **View Only / Unauthenticated:** Cannot initiate a merge.
+- Merging any branch into a **Locked** branch always triggers an Owner approval request, regardless of the initiating user's role. This check is enforced server-side.
+
+### F. Threat Model Summary
+
+| Surface | Risk | Mitigation |
+|---|---|---|
+| Supabase anon key exposure | Unrestricted DB access | RLS on all tables from Sprint 1 |
+| Client-supplied audit fields | Identity spoofing | DB trigger overwrites with `auth.uid()` |
+| Unsigned image uploads | Malicious file storage | Signed presets + server-side MIME validation |
+| App-layer permission checks | Bypass via API call | All permissions enforced as RLS policies |
+| Fusion without authorization | Collaborator overwrites locked data | Server-side role check before merge executes |
+| No auth before data writes | Anonymous data manipulation | Auth required as Sprint 1 prerequisite |
