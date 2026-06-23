@@ -252,7 +252,7 @@ This document breaks the Master Specification into actionable 1-week sprints for
 
     * Export Suite: PNG/SVG/PDF generation.
 
-    * **GEDCOM Import:** Server-side Route Handler that parses `.ged` files (GEDCOM 5.5.1). Maps `INDI` records to `persons`, `FAM` records to `union_nodes`. File size cap: 10MB — set `api.bodyParser.sizeLimit = '10mb'` in `next.config.js` (Next.js defaults to 4MB and will silently truncate larger files without this). Malformed records skipped with warnings. Large imports (>500 records) processed asynchronously to avoid Vercel's Route Handler timeout — use a Supabase Edge Function or background queue.
+    * **GEDCOM Import:** Server-side Route Handler that parses `.ged` files (GEDCOM 5.5.1). Maps `INDI` records to `persons`, `FAM` records to `union_nodes`. File size cap: 10MB — enforce in the route by checking `request.headers.get('content-length')` before reading the body (App Router Route Handlers do not use `next.config` `api.bodyParser`; enforce the limit in the handler itself). Malformed records skipped with warnings. Large imports (>500 records) processed asynchronously to avoid Vercel's Route Handler timeout — use a Supabase Edge Function or background queue.
 
     * **GEDCOM Export:** Export entire tree or selected subtree as `.ged` file. Available from High-Level Settings.
 
