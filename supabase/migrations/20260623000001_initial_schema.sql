@@ -3,6 +3,15 @@
 -- Family Tree App — Relationship-Centric DAG Architecture
 --
 -- ltree path convention: <tree_id>.<union_id>.<person_id>
+--
+-- IMPORTANT — UUID format in ltree paths:
+--   PostgreSQL ltree labels do NOT allow hyphens. UUID values
+--   must have hyphens removed before use as path segments.
+--   Use: replace(id::text, '-', '')
+--   Example: 'a1b2c3d4e5f6...' (32 hex chars, no hyphens)
+--   This produces valid ltree labels like:
+--     a1b2c3d4e5f64a1b8c2d3e4f5a6b7c8d.f1e2d3c4b5a64f3e2d1c0b9a8f7e6d5c.9a8b7c6d5e4f...
+--
 -- All audit fields (created_by, last_edited_by) are populated
 -- by the set_audit_fields() trigger in Sprint 1B — columns
 -- exist here so the schema is stable before RLS is written.
@@ -29,6 +38,9 @@ CREATE TABLE trees (
 );
 
 -- ─── persons ──────────────────────────────────────────────────────────────
+-- Note: tree_id is not in the original spec column list but is required here.
+-- Without it, RLS policies would need to parse the ltree path column to find
+-- the owning tree, which is fragile. A direct FK is cleaner and faster.
 CREATE TABLE persons (
   id                uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   tree_id           uuid NOT NULL REFERENCES trees(id),
@@ -66,6 +78,7 @@ CREATE INDEX persons_tree_idx   ON persons (tree_id);
 -- ─── union_nodes ──────────────────────────────────────────────────────────
 -- Represents a partnership (marriage, domestic partnership, etc.)
 -- Children connect to a union_node, not directly to a person.
+-- Note: tree_id added for same reason as persons — RLS efficiency.
 CREATE TABLE union_nodes (
   id                uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   tree_id           uuid NOT NULL REFERENCES trees(id),
