@@ -7,7 +7,7 @@ import { headers } from "next/headers";
 export async function signInWithGoogle(next?: string) {
   const supabase = await createClient();
   const headersList = await headers();
-  const origin = headersList.get("origin") ?? process.env.NEXT_PUBLIC_SUPABASE_URL!;
+  const origin = headersList.get("origin") ?? process.env.NEXT_PUBLIC_SITE_URL!;
 
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: "google",
@@ -24,7 +24,7 @@ export async function signInWithMagicLink(formData: FormData, next?: string) {
   const supabase = await createClient();
   const email = formData.get("email") as string;
   const headersList = await headers();
-  const origin = headersList.get("origin") ?? process.env.NEXT_PUBLIC_SUPABASE_URL!;
+  const origin = headersList.get("origin") ?? process.env.NEXT_PUBLIC_SITE_URL!;
 
   if (!email || !email.includes("@")) {
     return { error: "Please enter a valid email address." };
