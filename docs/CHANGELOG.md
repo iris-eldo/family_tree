@@ -98,3 +98,30 @@ Categories: `docs` `schema` `auth` `ui` `canvas` `api` `config` `security` `test
 [2026-06-16] [Pre-Sprint] [fix] — Master Spec §3B Basic Info tab updated to include death_date and death_location fields, which were in the schema but absent from the side panel spec
 [2026-06-16] [Pre-Sprint] [fix] — Sprint 1B auth task corrected: "Google OAuth and email magic link" (was "Google OAuth" only, inconsistent with Master Spec §8 and §9A)
 
+---
+
+## Sprint 1A — Environment & Data Modeling
+
+[2026-06-23] [Sprint 1A] [config] — Next.js 16.2.9 initialized with App Router, TypeScript, and Tailwind CSS v4
+[2026-06-23] [Sprint 1A] [config] — npm packages installed: @xyflow/react@12.11.1, zustand@5.0.14, framer-motion@12.40.0, @supabase/supabase-js@2.108.2, @supabase/ssr@0.12.0, zod@4.4.3, sonner@2.0.7, @sentry/nextjs@10.59.0
+[2026-06-23] [Sprint 1A] [config] — shadcn/ui v4.11.0 initialized with Tailwind v4 (auto-detected by shadcn CLI); components written to src/components/ui/
+[2026-06-23] [Sprint 1A] [schema] — Full 8-table schema committed as supabase/migrations/20260623000001_initial_schema.sql
+[2026-06-23] [Sprint 1A] [schema] — tree_id foreign key added to persons and union_nodes (intentional addition not in original spec); required for RLS policies — without it, policies must parse the ltree path column, which is fragile
+[2026-06-23] [Sprint 1A] [schema] — profile_image_url column added to persons (not in original spec); avoids a future ALTER TABLE migration when Cloudinary upload is implemented in Sprint 6
+[2026-06-23] [Sprint 1A] [schema] — created_at timestamp added to persons, union_nodes, edges, person_aliases, notifications (standard practice; not listed in spec but universally expected)
+[2026-06-23] [Sprint 1A] [schema] — ltree UUID format documented: hyphens must be removed from UUID values when constructing ltree path segments — use replace(id::text, '-', ''); noted in migration header, Master Spec §8, and Sprint_Roadmap.md
+[2026-06-23] [Sprint 1A] [config] — @supabase/ssr installed alongside @supabase/supabase-js; @supabase/ssr is required for cookie-based auth token storage in Next.js App Router (localStorage does not work server-side)
+[2026-06-23] [Sprint 1A] [config] — Connection pooling clarification: Supabase JS client routes all queries through PostgREST (not a direct Postgres connection), so connection pooling is handled transparently by Supabase infrastructure; no separate pooler URL needed in .env
+[2026-06-23] [Sprint 1A] [config] — Sentry initialized: sentry.client.config.ts (browser SDK) + sentry.server.config.ts (Node.js SDK) + src/instrumentation.ts (Next.js server initialization hook)
+[2026-06-23] [Sprint 1A] [ui] — src/app/error.tsx added as global React error boundary; captures unhandled errors with Sentry.captureException and shows a "Try again" reset UI
+[2026-06-23] [Sprint 1A] [config] — GitHub Actions CI pipeline created: .github/workflows/ci.yml runs tsc, eslint, vitest, npm audit --audit-level=high on push/PR to main and staging
+[2026-06-23] [Sprint 1A] [config] — Dependabot configured: .github/dependabot.yml for weekly npm dependency updates
+[2026-06-23] [Sprint 1A] [config] — .env.example created with all required environment variables, annotated with which are public vs. server-only
+[2026-06-23] [Sprint 1A] [config] — vitest.config.ts and playwright.config.ts configured; jsdom installed for Vitest browser environment; --passWithNoTests prevents CI failure before Sprint 1B tests are written
+[2026-06-23] [Sprint 1A] [schema] — seed.sql created: Hartwell family demo tree with 3 generations, 10 persons, 2 union nodes, 1 adoption edge — used for local dev and public landing page demo
+[2026-06-23] [Sprint 1A] [config] — supabase/config.toml created manually; developer must run supabase init via Supabase CLI to fully initialize the local dev environment
+[2026-06-23] [Sprint 1A] [fix] — next.config.ts: api.bodyParser is a Pages Router option and does not apply to App Router Route Handlers; GEDCOM body size will be enforced in the route handler via content-length header check (Sprint 14)
+[2026-06-23] [Sprint 1A] [config] — turbopack.root set in next.config.ts to suppress Next.js workspace root warning caused by a parent-directory package-lock.json
+[2026-06-23] [Sprint 1A] [config] — Route stubs created: /dashboard, /canvas/[tree_id], /login (placeholders; full implementations in Sprint 1B and Sprint 2)
+[2026-06-23] [Sprint 1A] [config] — Node.js version in CI pinned to 20 (LTS minimum per spec); local dev runs on Node 25.3.0 which exceeds the minimum requirement
+

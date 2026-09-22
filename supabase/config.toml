@@ -1,0 +1,40 @@
+# Supabase local development configuration.
+# Generated structure for the family tree project.
+# Run `supabase init` with the Supabase CLI to generate the full config,
+# or fill in your project details below.
+#
+# CLI install: brew install supabase/tap/supabase
+# Docs: https://supabase.com/docs/guides/local-development
+
+[project]
+project_id = "family-tree"
+
+[api]
+port = 54321
+
+[db]
+port = 54322
+shadow_port = 54320
+major_version = 15
+
+[studio]
+port = 54323
+
+[inbucket]
+port = 54324
+
+[storage]
+file_size_limit = "50MiB"
+
+[auth]
+site_url = "http://localhost:3000"
+additional_redirect_urls = ["https://localhost:3000"]
+jwt_expiry = 3600
+enable_refresh_token_rotation = true
+refresh_token_reuse_interval = 10
+enable_signup = true
+
+[auth.external.google]
+enabled = false
+client_id = "env(GOOGLE_CLIENT_ID)"
+secret = "env(GOOGLE_CLIENT_SECRET)"
