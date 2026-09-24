@@ -30,6 +30,8 @@ By decoupling biological data from the visual representation, we allow the softw
 
     - **Global Semantic Customization:** To support the diverse needs of different cultures and family structures, the legend is a persistent, floating UI element. Users can globally rename these categories or reassign the line styles—for instance, assigning a "Dotted" line to represent "Godparents" or a "Double-Solid" line to represent "Consanguineous Marriages."
 
+    - **Child–Parent Edge Styling (edges.edge_type):** Edges connecting children to Union Nodes carry an `edge_type` field with four values from the schema: `biological`, `adopted`, `foster`, `guardian`. The canonical visual convention is: `biological` renders as a **solid line** (no dash); `adopted`, `foster`, and `guardian` render as a **dashed line** (`strokeDasharray: "5 5"`) with a short text label (capitalized edge_type value). This mirrors the partner-line convention above — solid = formal/biological, dashed = legal/informal — and applies at all zoom levels. The same `getEdgeStyle()` utility in `src/lib/dag/edges.ts` (Sprint 3) owns this logic as the single source of truth; canvas rendering defers to it.
+
 ### C. Generational Alignment & The "Elastic" Layout Engine
 
 - **Fixed Generational Rows (Auto-Align):** The engine enforces a strict "Generational Row" rule by default. Every member of a specific generation is locked to the same horizontal Y-axis. This creates a chronological "strata" across the canvas, allowing users to scan left-to-right to see all relatives born within a specific era.

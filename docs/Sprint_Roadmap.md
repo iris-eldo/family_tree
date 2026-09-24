@@ -84,9 +84,11 @@ This document breaks the Master Specification into actionable 1-week sprints for
 
     * Custom Edge Logic: Bezier routing (Solid vs. Dashed lines).
 
-    * Generational Row Locking: Assign `generation_index` based on the "Lowest Parent" rule and write it to the `persons` table.
+    * Generational Row Locking: Assign `generation_index` based on the "Lowest Parent" rule. **Note:** The computation itself (pure math over the in-memory graph) is Sprint 3 scope. Writing `generation_index` back to the `persons` table is a separate DB integration step — it belongs with Sprint 5/6 (the add/edit mutation layer) when a stable write path through the canvas exists, not here. Sprint 3 only computes and returns the value.
 
-    * **[TEST]** Write Vitest tests for all coordinate math and generational placement logic — midpoint calculation, "Lowest Parent" rule, edge routing. These are the most likely source of silent regressions as the engine grows.
+    * Initial Coordinate Layout: Produce an initial `{ id, x, y }` placement for all nodes (persons and union nodes) when a tree is first opened or has no persisted positions. This is what Sprint 4's Elastic Shift operates on — Sprint 4 presupposes nodes already have starting coordinates. Implemented in `src/lib/dag/layout.ts` as `getInitialLayout()`.
+
+    * **[TEST]** Write Vitest tests for all coordinate math and generational placement logic — midpoint calculation, "Lowest Parent" rule, edge routing, initial layout. These are the most likely source of silent regressions as the engine grows.
 
 ### Sprint 4: Elastic Layout & Collision Detection
 
