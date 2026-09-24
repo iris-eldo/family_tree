@@ -93,7 +93,7 @@ export function FamilyCanvas({
   dbEdges,
   savedViewport,
 }: FamilyCanvasProps) {
-  const { nodes, edges, viewport, isLoading, setNodes, setEdges, setViewport, setLoading } =
+  const { nodes, edges, isLoading, setNodes, setEdges, setViewport, setLoading } =
     useCanvasStore();
 
   // Debounce ref for viewport persistence
@@ -160,11 +160,13 @@ export function FamilyCanvas({
     [setViewport, treeId]
   );
 
-  // Cleanup timers on unmount
+  // Cleanup timers on unmount — capture current Map reference to avoid stale ref warning
   useEffect(() => {
+    const timers = nodePositionTimers.current;
+    const vpTimer = viewportTimer;
     return () => {
-      if (viewportTimer.current) clearTimeout(viewportTimer.current);
-      nodePositionTimers.current.forEach(clearTimeout);
+      if (vpTimer.current) clearTimeout(vpTimer.current);
+      timers.forEach(clearTimeout);
     };
   }, []);
 

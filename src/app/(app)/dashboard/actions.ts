@@ -35,10 +35,27 @@ export async function getTrees() {
 
   if (!user) return [];
 
-  const { data } = await supabase
+  const { data: trees } = await supabase
     .from("trees")
     .select("id, name, updated_at, privacy")
     .order("updated_at", { ascending: false });
 
-  return data ?? [];
+  if (!trees || trees.length === 0) return [];
+
+  // Fetch collaborators for all trees in one query, count in TypeScript
+  const treeIds = trees.map((t) => t.id);
+  const { data: collabs } = await supabase
+    .from("tree_collaborators")
+    .select("tree_id")
+    .in("tree_id", treeIds);
+
+  const countByTree = (collabs ?? []).reduce<Record<string, number>>(
+    (acc, c) => { acc[c.tree_id!] = (acc[c.tree_id!] ?? 0) + 1; return acc; },
+    {}
+  );
+
+  return trees.map((tree) => ({
+    ...tree,
+    collaboratorCount: countByTree[tree.id] ?? 0,
+  }));
 }

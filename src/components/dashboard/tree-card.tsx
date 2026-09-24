@@ -7,9 +7,10 @@ type TreeCardProps = {
   name: string;
   updatedAt: string;
   privacy: "public" | "private";
+  collaboratorCount: number;
 };
 
-export function TreeCard({ id, name, updatedAt, privacy }: TreeCardProps) {
+export function TreeCard({ id, name, updatedAt, privacy, collaboratorCount }: TreeCardProps) {
   const relativeTime = formatRelativeTime(updatedAt);
 
   return (
@@ -27,7 +28,12 @@ export function TreeCard({ id, name, updatedAt, privacy }: TreeCardProps) {
           </span>
         )}
       </div>
-      <p className="text-xs text-zinc-400">Edited {relativeTime}</p>
+      <div className="flex items-center gap-3 text-xs text-zinc-400">
+        <span>Edited {relativeTime}</span>
+        {collaboratorCount > 0 && (
+          <span>· {collaboratorCount} collaborator{collaboratorCount !== 1 ? "s" : ""}</span>
+        )}
+      </div>
     </Link>
   );
 }
