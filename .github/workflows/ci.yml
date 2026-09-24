@@ -28,7 +28,22 @@ jobs:
       - name: Lint
         run: npm run lint
 
-      - name: Unit tests
+      - name: Set up Supabase CLI
+        uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Start local Supabase (applies migrations + seed.sql)
+        run: supabase start -x realtime,storage-api,imgproxy,studio,edge-runtime,logflare,vector,postgres-meta,supavisor,mailpit
+
+      - name: Export Supabase env vars for tests
+        run: |
+          status=$(supabase status -o json)
+          echo "NEXT_PUBLIC_SUPABASE_URL=$(echo "$status" | jq -r .API_URL)" >> "$GITHUB_ENV"
+          echo "NEXT_PUBLIC_SUPABASE_ANON_KEY=$(echo "$status" | jq -r .ANON_KEY)" >> "$GITHUB_ENV"
+          echo "SUPABASE_SERVICE_ROLE_KEY=$(echo "$status" | jq -r .SERVICE_ROLE_KEY)" >> "$GITHUB_ENV"
+
+      - name: Unit tests (incl. mandatory RLS security tests)
         run: npm run test
 
       - name: Security audit
