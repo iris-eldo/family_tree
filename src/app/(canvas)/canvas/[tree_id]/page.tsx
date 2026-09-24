@@ -1,19 +1,27 @@
-// Sprint 2: Full canvas with React Flow, Zustand state, viewport persistence,
-// canvas loading skeleton, and Zoom to Fit (F key).
-// Sprint 1B: Auth guard will redirect unauthenticated users to /login.
+import { getCanvasData } from "./actions";
+import { FamilyCanvas } from "@/components/canvas/family-canvas";
+
 export default async function CanvasPage({
   params,
 }: {
   params: Promise<{ tree_id: string }>;
 }) {
   const { tree_id } = await params;
+  const { tree, persons, unions, edges } = await getCanvasData(tree_id);
+
+  // Viewport is stored in legend_config.viewport (a jsonb column repurposed
+  // for this until a dedicated viewport column is added in a later migration)
+  const savedViewport =
+    (tree.legend_config as { viewport?: { x: number; y: number; zoom: number } } | null)
+      ?.viewport ?? null;
+
   return (
-    <div className="flex h-full items-center justify-center gap-4 text-center">
-      <div>
-        <h1 className="text-2xl font-semibold">Canvas</h1>
-        <p className="mt-1 font-mono text-sm text-zinc-500">tree_id: {tree_id}</p>
-        <p className="mt-2 text-zinc-500">Canvas coming in Sprint 2.</p>
-      </div>
-    </div>
+    <FamilyCanvas
+      treeId={tree_id}
+      persons={persons}
+      unions={unions}
+      dbEdges={edges}
+      savedViewport={savedViewport}
+    />
   );
 }
