@@ -26,6 +26,7 @@ export default async function DashboardPage() {
                 name={tree.name}
                 updatedAt={tree.updated_at}
                 privacy={tree.privacy as "public" | "private"}
+                collaboratorCount={tree.collaboratorCount}
               />
             </li>
           ))}
