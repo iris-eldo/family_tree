@@ -21,6 +21,7 @@ import UnionNode from "./union-node";
 import { saveViewport, saveNodePosition } from "@/app/(canvas)/canvas/[tree_id]/actions";
 import type { Database } from "@/types/database";
 import { toast } from "sonner";
+import { getEdgeStyle, type FamilyEdgeType } from "@/lib/dag/edges";
 
 // Register custom node types — must be stable (defined outside component)
 const nodeTypes = {
@@ -70,20 +71,19 @@ function buildNodes(persons: PersonRow[], unions: UnionRow[]): FamilyNode[] {
 
 // Transform DB edges into React Flow edges
 function buildEdges(dbEdges: EdgeRow[]): Edge[] {
-  return dbEdges.map((e) => ({
-    id: e.id,
-    source: e.union_node_id,
-    target: e.child_person_id,
-    // Dashed for non-biological relationships (Sprint 3 will refine with DAG engine)
-    style:
-      e.edge_type !== "biological"
-        ? { strokeDasharray: "5 5" }
-        : undefined,
-    label:
-      e.edge_type !== "biological"
-        ? e.edge_type.charAt(0).toUpperCase() + e.edge_type.slice(1)
-        : undefined,
-  }));
+  return dbEdges.map((e) => {
+    const { strokeDasharray } = getEdgeStyle(e.edge_type as FamilyEdgeType);
+    return {
+      id: e.id,
+      source: e.union_node_id,
+      target: e.child_person_id,
+      style: strokeDasharray ? { strokeDasharray } : undefined,
+      label:
+        e.edge_type !== "biological"
+          ? e.edge_type.charAt(0).toUpperCase() + e.edge_type.slice(1)
+          : undefined,
+    };
+  });
 }
 
 export function FamilyCanvas({
