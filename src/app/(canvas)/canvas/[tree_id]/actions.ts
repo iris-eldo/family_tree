@@ -53,10 +53,20 @@ export async function saveViewport(
 
   if (!user) return;
 
+  // Read current legend_config first — a blind overwrite would erase other
+  // fields (e.g. Sprint 7 legend/style customization) on every pan/zoom.
+  const { data: tree } = await supabase
+    .from("trees")
+    .select("legend_config")
+    .eq("id", treeId)
+    .single();
+
+  const existing = (tree?.legend_config as Record<string, unknown> | null) ?? {};
+
   await supabase
     .from("trees")
     .update({
-      legend_config: { viewport },
+      legend_config: { ...existing, viewport },
       updated_at: new Date().toISOString(),
     })
     .eq("id", treeId);

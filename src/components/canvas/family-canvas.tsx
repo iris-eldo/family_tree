@@ -112,19 +112,27 @@ export function FamilyCanvas({
     (changes) => {
       setNodes(applyNodeChanges(changes, nodes) as FamilyNode[]);
 
-      // Persist position changes with 2s debounce per node
+      // Persist position changes with 2s debounce per node.
+      // Use change.position (carried on the change object) — not nodes.find(),
+      // which reads the stale pre-update closure and can lag one drag behind.
       changes.forEach((change) => {
-        if (change.type === "position" && change.dragging === false && change.id) {
+        if (
+          change.type === "position" &&
+          change.dragging === false &&
+          change.id &&
+          change.position
+        ) {
           const nodeId = change.id;
           const node = nodes.find((n) => n.id === nodeId);
           if (!node || node.type !== "person") return;
 
+          const { x, y } = change.position;
           const existing = nodePositionTimers.current.get(nodeId);
           if (existing) clearTimeout(existing);
 
           const timer = setTimeout(async () => {
             try {
-              await saveNodePosition(nodeId, treeId, node.position.x, node.position.y);
+              await saveNodePosition(nodeId, treeId, x, y);
             } catch {
               toast.error("Failed to save node position.");
             }
