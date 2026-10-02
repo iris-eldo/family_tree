@@ -8,6 +8,14 @@ export default defineConfig({
     environment: "jsdom",
     setupFiles: ["./src/tests/setup.ts"],
     globals: true,
+    exclude: [
+      // Default Vitest excludes
+      "**/node_modules/**",
+      "**/dist/**",
+      // Exclude worktrees created by other Claude sessions — they have their
+      // own test files that import modules not present in this branch
+      "**/.claude/worktrees/**",
+    ],
   },
   resolve: {
     alias: {
