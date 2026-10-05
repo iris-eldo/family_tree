@@ -238,13 +238,13 @@ This document breaks the Master Specification into actionable 1-week sprints for
 
     * Fine-tuning animation easing and transition speeds (Framer Motion spring configs).
 
-    * **[TEST] E2E Test Suite:** Expand Playwright tests to cover the full golden path: sign up → create tree → add person → add partner → add child → invite collaborator → view as View Only → delete node → restore from trash. All tests must pass on staging before Sprint 14 begins.
+    * **[TEST] E2E Test Suite:** Expand Playwright tests to cover the full golden path: sign up → create tree → add person → add partner → add child → invite collaborator → view as View Only → delete node → restore from trash. All tests must pass on staging before Sprint 15 (launch). Sprint 14's visual redesign will re-run these tests as its own regression guard.
 
     * **[A11Y] Accessibility Audit:** Full manual keyboard navigation pass across all screens. Run axe-core report and resolve all critical and serious violations. Target: zero critical violations before launch.
 
     * **[SECURITY] Pre-launch Security Review:** Verify Sentry is receiving errors from staging. Re-run all RLS policy tests. Confirm `SUPABASE_SERVICE_ROLE_KEY` appears in zero client-accessible files. Confirm CSP headers are active and not blocking any app functionality. Run `npm audit`. Test session expiry flow: expire a JWT manually and confirm the "session expired" modal holds canvas state correctly. **Restore CI audit gate:** `.github/workflows/ci.yml` has `--audit-level=critical` as of Sprint 4 (lowered to unblock PRs blocked by `braces <=3.0.3`, GHSA-vfj7-8cjw-p6xm, which has no patched release). Before launch, restore to `--audit-level=high`, or if `braces` is still unpatched, add an explicit advisory allowlist entry for that CVE so the gate remains at `high` for all other packages.
 
-    * **[COMPAT] Browser Compatibility:** Manually verify the full golden path in Chrome, Firefox, and Safari. Canvas interactions (pan, zoom, drag) must work identically across all three. Fix any Safari-specific CSS or event-handling bugs before Sprint 14.
+    * **[COMPAT] Browser Compatibility:** Manually verify the full golden path in Chrome, Firefox, and Safari. Canvas interactions (pan, zoom, drag) must work identically across all three. Fix any Safari-specific CSS or event-handling bugs before Sprint 15 (launch). Sprint 14's visual redesign will re-run this check as its own regression guard.
 
     * **Performance profiling:** Run Playwright performance traces against the benchmarks in Master Spec §6B. Fix any regressions.
 
@@ -256,7 +256,7 @@ This document breaks the Master Specification into actionable 1-week sprints for
 
     * **Design System Pass:** Replace ad-hoc Tailwind utility classes (scattered `zinc-*`, `blue-500`, etc.) with central design tokens: color palette, type scale, spacing, border-radius, shadow levels, and motion parameters. Define tokens in CSS variables and update all components to use them. Establish coherent light and dark theme parity.
 
-    * **Icon System:** Replace all text-glyph icons with `lucide-react` (already a dependency): zoom toolbar `+`, `−`, `⊡` buttons; death dagger `†` in `PersonNode`; any other text-character icons found in components. Confirm every icon button retains its `aria-label` from Sprint 6's accessibility groundwork.
+    * **Icon System:** Replace all text-glyph icons with `lucide-react` (already a dependency): zoom toolbar `+`, `−`, `⊡` buttons; death dagger `†` in `PersonNode`; any other text-character icons found in components. The three zoom-toolbar buttons already have `aria-label`s (added Sprint 2). The `†` death badge in `PersonNode` does not — add one now (Master Spec §3E requires descriptive `aria-label` on all icon badges). Any new icon buttons introduced in this sprint must also receive `aria-label`s.
 
     * **Copy & Voice:** Rewrite placeholder and boilerplate text throughout the app: login page tagline, empty-state messages, error state text, onboarding tooltip strings. Replace text that reads as AI-template copy with a consistent product voice.
 

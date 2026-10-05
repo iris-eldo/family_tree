@@ -285,7 +285,7 @@ The infinite canvas is a desktop-first experience. Mobile support is scoped as f
 
 ### Out of Scope for v1
 
-The following features are explicitly out of scope for v1 and will not be built during the 14-sprint roadmap. They are documented here to prevent scope creep and to set expectations for contributors:
+The following features are explicitly out of scope for v1 and will not be built during the 15-sprint roadmap. They are documented here to prevent scope creep and to set expectations for contributors:
 
 | Feature | Status | Notes |
 |---|---|---|

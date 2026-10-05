@@ -1,7 +1,7 @@
 import type { NextConfig } from "next";
 
 // Note: App Router Route Handlers do not use next.config api.bodyParser.
-// The GEDCOM import Route Handler (Sprint 14) will handle large bodies via
+// The GEDCOM import Route Handler (Sprint 15) will handle large bodies via
 // streaming with manual content-length checks.
 const nextConfig: NextConfig = {
   turbopack: {
