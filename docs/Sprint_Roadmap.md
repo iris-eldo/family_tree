@@ -200,7 +200,7 @@ This document breaks the Master Specification into actionable 1-week sprints for
 
     * **[TEST] Performance Benchmarks:** Measure against the targets in Master Spec Section 6B using Playwright performance traces. Must pass before Sprint 11: (1) 1,000-node tree at 60fps on mid-range laptop, (2) 5,000-node tree at 30fps minimum, (3) initial canvas load under 2 seconds for 500-node trees. Fix regressions before proceeding.
 
-## Phase 4: Collaboration & Launch (Weeks 11-14)
+## Phase 4: Collaboration & Launch (Weeks 11-15)
 
 ### Sprint 11: Subtree Permissions
 
@@ -242,13 +242,41 @@ This document breaks the Master Specification into actionable 1-week sprints for
 
     * **[A11Y] Accessibility Audit:** Full manual keyboard navigation pass across all screens. Run axe-core report and resolve all critical and serious violations. Target: zero critical violations before launch.
 
-    * **[SECURITY] Pre-launch Security Review:** Verify Sentry is receiving errors from staging. Re-run all RLS policy tests. Confirm `SUPABASE_SERVICE_ROLE_KEY` appears in zero client-accessible files. Confirm CSP headers are active and not blocking any app functionality. Run `npm audit`. Test session expiry flow: expire a JWT manually and confirm the "session expired" modal holds canvas state correctly.
+    * **[SECURITY] Pre-launch Security Review:** Verify Sentry is receiving errors from staging. Re-run all RLS policy tests. Confirm `SUPABASE_SERVICE_ROLE_KEY` appears in zero client-accessible files. Confirm CSP headers are active and not blocking any app functionality. Run `npm audit`. Test session expiry flow: expire a JWT manually and confirm the "session expired" modal holds canvas state correctly. **Restore CI audit gate:** `.github/workflows/ci.yml` has `--audit-level=critical` as of Sprint 4 (lowered to unblock PRs blocked by `braces <=3.0.3`, GHSA-vfj7-8cjw-p6xm, which has no patched release). Before launch, restore to `--audit-level=high`, or if `braces` is still unpatched, add an explicit advisory allowlist entry for that CVE so the gate remains at `high` for all other packages.
 
     * **[COMPAT] Browser Compatibility:** Manually verify the full golden path in Chrome, Firefox, and Safari. Canvas interactions (pan, zoom, drag) must work identically across all three. Fix any Safari-specific CSS or event-handling bugs before Sprint 14.
 
     * **Performance profiling:** Run Playwright performance traces against the benchmarks in Master Spec §6B. Fix any regressions.
 
-### Sprint 14: Export, Docs & Deployment
+### Sprint 14: Visual Identity & Design Polish
+
+* **Goal:** Remove generic AI-template patterns and establish a deliberate, consistent visual identity. No behavior changes — purely visual and copy. The product should look professionally designed, not assembled from defaults.
+
+* **Tasks:**
+
+    * **Design System Pass:** Replace ad-hoc Tailwind utility classes (scattered `zinc-*`, `blue-500`, etc.) with central design tokens: color palette, type scale, spacing, border-radius, shadow levels, and motion parameters. Define tokens in CSS variables and update all components to use them. Establish coherent light and dark theme parity.
+
+    * **Icon System:** Replace all text-glyph icons with `lucide-react` (already a dependency): zoom toolbar `+`, `−`, `⊡` buttons; death dagger `†` in `PersonNode`; any other text-character icons found in components. Confirm every icon button retains its `aria-label` from Sprint 6's accessibility groundwork.
+
+    * **Copy & Voice:** Rewrite placeholder and boilerplate text throughout the app: login page tagline, empty-state messages, error state text, onboarding tooltip strings. Replace text that reads as AI-template copy with a consistent product voice.
+
+    * **Remove Generic UI Patterns:** Audit landing page and authenticated pages for stock gradient/hero blocks, default card-grid-with-shadow layouts, and unmodified shadcn defaults with no identity applied. Apply design tokens to give each screen a deliberate look.
+
+    * **Fix Dead Links:** `/login` links to `/terms` and `/privacy`; neither route exists (the build has only `/`, `/login`, `/dashboard`, `/canvas/[tree_id]`, and `/auth/callback`). Add placeholder route stubs with a "Coming soon" message now; the real privacy policy is a Sprint 15 requirement. A user clicking "Privacy Policy" before sign-up and hitting a 404 is unacceptable pre-launch.
+
+    * **Landing Page & Metadata:** Favicon, `<meta>` description, Open Graph image. Confirm `seed.sql`'s demo tree presents correctly on the redesigned landing page.
+
+    * **Loading, Empty & Error States:** Apply consistent styled states across all routes: loading skeleton, first-visit empty tree (onboarding from Master Spec §3C), error boundary (`src/app/error.tsx`), 404 page.
+
+    * **Regression Guard:** No behavior changes are permitted in this sprint. After restyling, run the full E2E golden path (Sprint 13) against the updated staging build and confirm all tests still pass.
+
+    * **[A11Y] Re-audit After Restyle:** Re-run axe-core and the manual keyboard pass from Sprint 13 after the restyle — a palette change can silently fail WCAG 2.1 AA color contrast requirements that passed before. Resolve any new violations before Sprint 15.
+
+    * **[COMPAT] Re-run Browser Check:** Re-run the Chrome/Firefox/Safari manual pass from Sprint 13 after the restyle — CSS changes can introduce Safari-specific regressions.
+
+    * **[NOTE] README Screenshots:** All `README.md` screenshots (Sprint 15) must be taken **after** this sprint completes. Do not capture the unrestyled UI for the open-source release.
+
+### Sprint 15: Export, Docs & Deployment
 
 * **Goal:** Final polish and community handoff.
 
@@ -263,7 +291,7 @@ This document breaks the Master Specification into actionable 1-week sprints for
     * **GDPR Compliance:** Implement right-to-erasure (account deletion purges all owned trees and person records). Implement data export (GEDCOM + account metadata download from Settings). Publish privacy policy before launch.
 
     * Open Source Prep: Finalize the following before launch:
-        - `README.md` — overview, screenshots, tech stack, quickstart
+        - `README.md` — overview, screenshots (taken after Sprint 14's visual design pass), tech stack, quickstart
         - `CONTRIBUTING.md` — how to run locally, set up env vars, run tests, submit a PR
         - `SECURITY.md` — responsible disclosure process (how to report vulnerabilities privately)
         - `CODE_OF_CONDUCT.md` — Contributor Covenant recommended
